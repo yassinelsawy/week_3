@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fontresoft/fontresoft.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:week_3/DB/sq.dart';
 import 'package:week_3/profile.dart';
 import 'package:week_3/utils.dart';
 import 'package:csc_picker/csc_picker.dart';
@@ -15,8 +17,10 @@ class Singup extends StatefulWidget {
 }
 
 class _SingupState extends State<Singup> {
-  Uint8List? _image;
+  
+  Sq db = Sq();
 
+  Uint8List? _image;
   void selectImage() async {
     Uint8List img = await pickImage(ImageSource.gallery);
     setState(() {
@@ -25,12 +29,29 @@ class _SingupState extends State<Singup> {
   }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   bool _PasswordVisible = false;
   bool ismale = false;
   bool isfemale = false;
+
+
+  Future <void> _signUp() async {
+
+    if (_formKey.currentState!.validate()) {
+      await db.insertUser(nameController.text,emailController.text, passwordController.text);
+      Get.to(Profile(
+        name: nameController.text,
+        email: emailController.text,
+        password: passwordController.text,
+      ));
+
+      Get.snackbar('Success', 'User added successfully');
+    }
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +108,8 @@ class _SingupState extends State<Singup> {
                   ],
                 ),
                 const SizedBox(height: 40),
-                TextField(
+                TextFormField(
+                  controller: nameController,
                   decoration: InputDecoration(
                     label: Text(
                       'Full Name',
@@ -138,14 +160,10 @@ class _SingupState extends State<Singup> {
                         const EdgeInsets.only(left: 20, top: 14, bottom: 14),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    } else if (!value.contains('@') ||
-                        !value.contains('.com') ||
-                        value.length < 6) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
+                    if(!GetUtils.isEmail(value?? '')){
+                    return 'Please enter a valid email';
+                  }
+                  return null;
                   },
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -191,12 +209,10 @@ class _SingupState extends State<Singup> {
                     //contentPadding: const EdgeInsets.only(left: 20, top: 14, bottom: 14),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    } else if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
+                    if(!GetUtils.isLengthGreaterOrEqual(value?? '', 6)){
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
                   },
                   keyboardType: TextInputType.visiblePassword,
                 ),
@@ -340,16 +356,7 @@ class _SingupState extends State<Singup> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if(_formKey.currentState!.validate())
-                      {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Profile(
-                                email: emailController.text,
-                                password: passwordController.text))
-                        );
-                      }
+                    _signUp();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,

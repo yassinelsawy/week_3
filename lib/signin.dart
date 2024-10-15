@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fontresoft/fontresoft.dart';
+import 'package:get/get.dart';
 import 'package:week_3/profile.dart';
 import 'package:week_3/singup.dart';
 
@@ -16,6 +17,7 @@ class _SigninState extends State<Signin> {
   // ignore: non_constant_identifier_names
   bool _PasswordVisible = true;
   final  _formKey = GlobalKey<FormState>();
+  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   @override
@@ -163,13 +165,13 @@ class _SigninState extends State<Signin> {
                   child: TextButton(
                     onPressed: (){
                       if(_formKey.currentState!.validate()){
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => Profile(
-                            email: emailController.text,
-                            password: passwordController.text,
-                          ),
+                        Get.to(Profile(
+                          name: nameController.text,
+                          email: emailController.text,
+                          password: passwordController.text,
                         ));
                       }
+
                     },
                     child: Text(
                       'LOGIN',
@@ -192,9 +194,7 @@ class _SigninState extends State<Signin> {
                     ),),
                     InkWell(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => const Singup(),
-                        ));
+                        Get.to(Singup());
                       
                       },
                       child: Text(
